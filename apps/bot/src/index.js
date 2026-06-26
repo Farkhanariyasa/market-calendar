@@ -334,8 +334,8 @@ function startReminderSchedule() {
     const currentHour = today.getHours();
     const currentMinute = today.getMinutes();
     
-    // Kirim setiap jam 08:00 pagi
-    if (currentHour === 8 && currentMinute === 0) {
+    // Kirim setiap jam 06:00 pagi
+    if (currentHour === 6 && currentMinute === 0) {
       const dateStr = today.toISOString().split('T')[0];
       if (lastReminderDate !== dateStr) {
         lastReminderDate = dateStr;
@@ -352,3 +352,16 @@ function startReminderSchedule() {
 }
 
 client.login(process.env.DISCORD_TOKEN);
+
+// ==========================================
+// LIGHTWEIGHT HTTP SERVER FOR RENDER KEEP-ALIVE
+// ==========================================
+const http = require('http');
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('CalBot is active and running!\n');
+});
+const port = process.env.PORT || 8080;
+server.listen(port, () => {
+  console.log(`[Keep-Alive] HTTP server listening on port ${port}`);
+});
