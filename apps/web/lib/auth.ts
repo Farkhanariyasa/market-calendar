@@ -18,13 +18,13 @@ export const authOptions: NextAuthOptions = {
       if (account.provider === "discord") {
         try {
           await prisma.user.upsert({
-            where: { discordId: profile.id },
+            where: { discordId: (profile as any).id },
             update: {
               name: user.name,
               image: user.image,
             },
             create: {
-              discordId: profile.id,
+              discordId: (profile as any).id,
               name: user.name,
               image: user.image,
             },

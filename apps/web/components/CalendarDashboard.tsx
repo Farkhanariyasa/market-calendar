@@ -7,6 +7,8 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import useSWR from "swr";
 
+const FullCalendarComponent = FullCalendar as any;
+
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function CalendarDashboard({ session }: { session: any }) {
@@ -134,7 +136,7 @@ export default function CalendarDashboard({ session }: { session: any }) {
       {/* Main Calendar Area - Maximize space */}
       <div className="flex-1 p-4 overflow-hidden h-full flex flex-col">
         <div className="flex-1 bg-slate-800/30 rounded-xl border border-slate-700/50 backdrop-blur-xl p-4 shadow-2xl overflow-hidden">
-          <FullCalendar
+          <FullCalendarComponent
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
             headerToolbar={{
@@ -148,7 +150,7 @@ export default function CalendarDashboard({ session }: { session: any }) {
             height="100%"
             dayMaxEvents={true}
             editable={true}
-            eventDrop={async (info) => {
+            eventDrop={async (info: any) => {
               await fetch(`/api/events/${info.event.id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
