@@ -1,0 +1,14 @@
+{
+  "name": "cal-bot-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npx concurrently \"npm run dev -w @cal-bot/bot\" \"npm run dev -w @cal-bot/web\"",
+    "build": "npm run build --workspaces",
+    "start": "npm run start --workspaces"
+  }
+}

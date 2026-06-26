@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  discordId     String    @unique
+  name          String?
+  image         String?
+  eventsCreated Event[]
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  color       String?  @default("#3b82f6") // Default tailwind blue-500
+  visibility  String   @default("public")
+  guildId     String?
+  channelId   String?
+  image       String?  // Untuk menyimpan base64 gambar
+  market      String   @default("US") // US, INDO, BOTH
+
+  createdBy   String
+  creator     User     @relation(fields: [createdBy], references: [discordId])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./calendar.db:/app/calendar.db
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  bot:
+    build:
+      context: .
+      dockerfile: apps/bot/Dockerfile
+    volumes:
+      - ./calendar.db:/app/calendar.db
+    env_file:
+      - .env
+    restart: unless-stopped
