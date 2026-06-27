@@ -47,7 +47,11 @@ module.exports = (() => {
         getVersion() { return config.info.version; }
 
         loadSettings() {
-            this.apiUrl = BdApi.Data.load("MarketCalendar", "apiUrl") || "http://localhost:3001";
+            this.apiUrl = BdApi.Data.load("MarketCalendar", "apiUrl") || "https://market-calendar-web.vercel.app";
+            if (this.apiUrl === "http://localhost:3001") {
+                this.apiUrl = "https://market-calendar-web.vercel.app";
+                BdApi.Data.save("MarketCalendar", "apiUrl", this.apiUrl);
+            }
             this.apiToken = BdApi.Data.load("MarketCalendar", "apiToken") || "super_secret_calendar_key_123!";
         }
 
@@ -111,7 +115,7 @@ module.exports = (() => {
             urlLabel.style.fontSize = "13px";
             const urlInput = document.createElement("input");
             urlInput.type = "text";
-            urlInput.value = BdApi.Data.load("MarketCalendar", "apiUrl") || "http://localhost:3001";
+            urlInput.value = BdApi.Data.load("MarketCalendar", "apiUrl") || "https://market-calendar-web.vercel.app";
             urlInput.style.width = "100%";
             urlInput.style.padding = "8px 12px";
             urlInput.style.backgroundColor = "var(--background-secondary)";
@@ -613,7 +617,7 @@ module.exports = (() => {
 
         updateChannelView() {
             const channelName = this.getCurrentChannelName();
-            const isCalendarChannel = channelName.includes("calendar") || channelName.includes("kalender");
+            const isCalendarChannel = channelName.includes("market-calendar") || channelName.includes("marketcalendar");
 
             if (isCalendarChannel) {
                 document.body.classList.add("mc-in-calendar-channel");
