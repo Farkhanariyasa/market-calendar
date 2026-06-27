@@ -1,6 +1,7 @@
 FROM node:20-slim
 RUN apt-get update && apt-get install -y openssl ca-certificates tzdata && rm -rf /var/lib/apt/lists/*
 ENV TZ=Asia/Jakarta
+ENV PORT=7860
 WORKDIR /app
 
 # Salin package.json root dan semua workspace untuk optimasi cache npm
