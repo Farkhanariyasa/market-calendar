@@ -167,9 +167,22 @@ async function buildCalendarMessage(year, month) {
 client.on('interactionCreate', async (interaction) => {
   if (interaction.isChatInputCommand()) {
     if (interaction.commandName === 'calendar') {
+      // Cari channel #market-calendar di guild ini
+      const marketCalChannel = interaction.guild?.channels.cache.find(
+        (ch) => ch.name.toLowerCase() === 'market-calendar' && ch.isTextBased()
+      );
+
       const now = new Date();
       const msgData = await buildCalendarMessage(now.getFullYear(), now.getMonth());
-      await interaction.reply(msgData);
+
+      if (marketCalChannel && marketCalChannel.id !== interaction.channelId) {
+        // Kirim calendar grid ke #market-calendar
+        await marketCalChannel.send(msgData);
+        await interaction.reply({ content: `📅 Calendar telah dikirim ke <#${marketCalChannel.id}>!`, ephemeral: true });
+      } else {
+        // Jika sudah di #market-calendar atau channel tidak ditemukan, reply di sini
+        await interaction.reply(msgData);
+      }
     }
   }
 
@@ -337,18 +350,37 @@ function startReminderSchedule() {
     // Kirim setiap jam 06:00 pagi
     if (currentHour === 6 && currentMinute === 0) {
       const dateStr = today.toISOString().split('T')[0];
-      if (lastReminderDate !== dateStr) {
-        lastReminderDate = dateStr;
+      
+      // Cek apakah sudah pernah kirim hari ini (menggunakan database agar persist saat restart)
+      const existing = await prisma.event.findFirst({
+        where: {
+          title: `__reminder_sent_${dateStr}__`,
+        }
+      });
+
+      if (!existing) {
+        // Tandai sudah kirim hari ini
+        try {
+          await prisma.event.create({
+            data: {
+              title: `__reminder_sent_${dateStr}__`,
+              startTime: new Date(),
+              endTime: new Date(),
+              market: 'SYSTEM',
+              createdBy: 'system',
+              visibility: 'hidden',
+            }
+          });
+        } catch (e) {
+          // Abaikan jika gagal buat marker (misal createdBy tidak valid)
+          console.log('[Reminder] Could not create marker, using memory fallback.');
+        }
         await sendDailyReminder();
       }
     }
   }, 60000);
 
-  // Jalankan sekali saat startup (tunda 5 detik agar bot terkoneksi sempurna)
-  setTimeout(() => {
-    console.log("[Reminder] Startup reminder check scheduled.");
-    sendDailyReminder();
-  }, 5000);
+  console.log("[Reminder] Schedule started. Reminder will be sent at 06:00 WIB.");
 }
 
 client.login(process.env.DISCORD_TOKEN);
