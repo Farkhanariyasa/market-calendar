@@ -185,7 +185,7 @@ export default function CalendarDashboard({ session }: { session: any }) {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">Market</label>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Tipe</label>
                 <div className="flex gap-4 flex-wrap">
                   <label className="flex items-center gap-2 cursor-pointer text-sm">
                     <input type="radio" name="market" value="US" checked={market === "US"} onChange={() => setMarket("US")} className="text-blue-500" />
@@ -259,7 +259,7 @@ export default function CalendarDashboard({ session }: { session: any }) {
             <div className="p-6 overflow-y-auto">
               <div className="flex items-center gap-2 mb-2">
                 <span className="px-2 py-1 text-xs font-bold rounded-full text-white" style={{ backgroundColor: getMarketColor(selectedEvent.market) }}>
-                  {selectedEvent.market} MARKET
+                  {selectedEvent.market}
                 </span>
               </div>
               <h3 className="text-2xl font-bold mb-2">{selectedEvent.title}</h3>

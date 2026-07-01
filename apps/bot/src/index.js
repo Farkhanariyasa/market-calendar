@@ -65,6 +65,8 @@ function generateCalendarText(year, month, events) {
       if (market === 'US') colorCode = '\x1b[34m';
       else if (market === 'INDO') colorCode = '\x1b[31m'; // Red
       else if (market === 'BOTH') colorCode = '\x1b[35m'; // Purple
+      else if (market === 'PROJECTS') colorCode = '\x1b[32m'; // Green
+      else if (market === 'OTHER') colorCode = '\x1b[33m'; // Yellow
       
       cell = `${colorCode}[${dayStr}]\x1b[0m`;
     }
@@ -106,6 +108,8 @@ async function buildCalendarMessage(year, month) {
       let emoji = '🔵';
       if (e.market === 'INDO') emoji = '🔴';
       if (e.market === 'BOTH') emoji = '🟣';
+      if (e.market === 'PROJECTS') emoji = '🟢';
+      if (e.market === 'OTHER') emoji = '🟠';
       eventList += `${emoji} **${e.market} Market Closed:** ${e.title}\n`;
       if (e.description) {
         eventList += `> *${e.description.replace(/\n/g, '\n> ')}*\n\n`;
@@ -225,7 +229,7 @@ client.on('interactionCreate', async (interaction) => {
 
       const embed = new EmbedBuilder()
         .setTitle(`📌 Event Detail: ${evt.title}`)
-        .setColor(evt.market === 'INDO' ? '#ef4444' : evt.market === 'US' ? '#3b82f6' : '#a855f7')
+        .setColor(evt.market === 'INDO' ? '#ef4444' : evt.market === 'BOTH' ? '#a855f7' : evt.market === 'PROJECTS' ? '#10b981' : evt.market === 'OTHER' ? '#f59e0b' : '#3b82f6')
         .addFields(
           { name: 'Market', value: evt.market, inline: true },
           { name: 'Date', value: `<t:${Math.floor(evt.startTime.getTime() / 1000)}:D>`, inline: true },
@@ -257,7 +261,7 @@ client.on('interactionCreate', async (interaction) => {
           data: {
             title,
             description,
-            market: ["US", "INDO", "BOTH"].includes(marketVal) ? marketVal : "US",
+            market: ["US", "INDO", "BOTH", "PROJECTS", "OTHER"].includes(marketVal) ? marketVal : "US",
             startTime: startDateTime,
             endTime: endDateTime,
             createdBy: interaction.user.id,
@@ -311,6 +315,8 @@ async function sendDailyReminder() {
       let emoji = '🔵';
       if (e.market === 'INDO') emoji = '🔴';
       if (e.market === 'BOTH') emoji = '🟣';
+      if (e.market === 'PROJECTS') emoji = '🟢';
+      if (e.market === 'OTHER') emoji = '🟠';
       desc += `${emoji} **${e.market} Market - ${e.title}**\n`;
       if (e.description) {
         desc += `> *${e.description}*\n`;
@@ -321,18 +327,14 @@ async function sendDailyReminder() {
 
     client.guilds.cache.forEach(async (guild) => {
       const generalChannel = guild.channels.cache.find(
-        (ch) => (ch.name.toLowerCase() === 'general' || 
-                 ch.name.toLowerCase() === 'general-chat' || 
-                 ch.name.toLowerCase() === 'utama' || 
-                 ch.name.toLowerCase() === 'chat') && 
-                ch.isTextBased()
+        (ch) => ch.name.toLowerCase() === 'market-update' && ch.isTextBased()
       );
 
       if (generalChannel) {
         await generalChannel.send({ embeds: [embed] });
         console.log(`[Reminder] Sent daily reminder embed to guild: ${guild.name} in channel: ${generalChannel.name}`);
       } else {
-        console.log(`[Reminder] Channel 'general/utama/chat' not found in guild: ${guild.name}`);
+        console.log(`[Reminder] Channel 'market-update' not found in guild: ${guild.name}`);
       }
     });
   } catch (error) {
@@ -344,11 +346,11 @@ function startReminderSchedule() {
   // Jalankan pengecekan setiap menit
   setInterval(async () => {
     const today = new Date();
-    const currentHour = today.getHours();
-    const currentMinute = today.getMinutes();
+    const currentHour = (today.getUTCHours() + 7) % 24;
+    const currentMinute = today.getUTCMinutes();
     
-    // Kirim setiap jam 06:00 pagi
-    if (currentHour === 6 && currentMinute === 0) {
+    // Kirim setiap jam 05:00 pagi WIB
+    if (currentHour === 5 && currentMinute === 0) {
       const dateStr = today.toISOString().split('T')[0];
       
       // Cek apakah sudah pernah kirim hari ini (menggunakan database agar persist saat restart)
@@ -380,7 +382,7 @@ function startReminderSchedule() {
     }
   }, 60000);
 
-  console.log("[Reminder] Schedule started. Reminder will be sent at 06:00 WIB.");
+  console.log("[Reminder] Schedule started. Reminder will be sent at 05:00 WIB.");
 }
 
 client.login(process.env.DISCORD_TOKEN);

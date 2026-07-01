@@ -383,6 +383,8 @@ module.exports = (() => {
                 .mc-dot-legend.US { background-color: #bd93f9; }
                 .mc-dot-legend.INDO { background-color: #ff5555; }
                 .mc-dot-legend.BOTH { background-color: #ff79c6; }
+                .mc-dot-legend.PROJECTS { background-color: #50fa7b; }
+                .mc-dot-legend.OTHER { background-color: #ffb86c; }
                 .mc-manage-btn {
                     background: #bd93f9;
                     color: #282a36;
@@ -769,14 +771,33 @@ module.exports = (() => {
                         let color = "#bd93f9";
                         if (event.market === "INDO") color = "#ff5555";
                         if (event.market === "BOTH") color = "#ff79c6";
+                        if (event.market === "PROJECTS") color = "#50fa7b";
+                        if (event.market === "OTHER") color = "#ffb86c";
 
                         return h("div", { key: event.id || idx, className: "mc-modal-detail-item" },
                             h("div", { style: { display: "flex", gap: "8px", alignItems: "center", marginBottom: "8px" } },
                                 h("span", { 
                                     className: "mc-market-badge",
                                     style: { backgroundColor: color }
-                                }, `${event.market} Market`),
-                                h("span", { style: { fontSize: "12px", color: "#94a3b8" } }, new Date(event.startTime).toLocaleDateString("id-ID"))
+                                }, `${event.market}`),
+                                h("span", { style: { fontSize: "12px", color: "#94a3b8" } }, new Date(event.startTime).toLocaleDateString("id-ID")),
+                                h("button", {
+                                    style: { marginLeft: "auto", background: "transparent", border: "none", color: "#ff5555", cursor: "pointer", fontSize: "12px", fontWeight: "bold" },
+                                    onClick: () => {
+                                        if (confirm("Are you sure you want to delete this event?")) {
+                                            fetch(`${self.apiUrl}/api/events/${event.id}`, {
+                                                method: "DELETE",
+                                                headers: { "Authorization": `Bearer ${self.apiToken}` }
+                                            }).then(res => {
+                                                if(!res.ok) throw new Error("Failed");
+                                                BdApi.showToast("Event deleted!", { type: "success" });
+                                                if (refetch) refetch();
+                                            }).catch(err => {
+                                                BdApi.showToast("Failed to delete event", { type: "error" });
+                                            });
+                                        }
+                                    }
+                                }, "🗑 Delete")
                             ),
                             h("h4", { style: { fontSize: "16px", fontWeight: "bold", color: "#f8fafc", marginBottom: "4px" } }, event.title),
                             event.description && h("p", { 
@@ -836,15 +857,17 @@ module.exports = (() => {
                         })
                     ),
                     h("div", { className: "mc-form-group" },
-                        h("label", { className: "mc-form-label" }, "Market *"),
+                        h("label", { className: "mc-form-label" }, "Tipe *"),
                         h("select", { 
                             className: "mc-form-select", 
                             value: market,
                             onChange: (e) => setMarket(e.target.value) 
                         },
-                            h("option", { value: "US" }, "US Market"),
-                            h("option", { value: "INDO" }, "INDO Market"),
-                            h("option", { value: "BOTH" }, "BOTH (US & INDO)")
+                            h("option", { value: "US" }, "US"),
+                            h("option", { value: "INDO" }, "INDO"),
+                            h("option", { value: "BOTH" }, "BOTH"),
+                            h("option", { value: "PROJECTS" }, "PROJECTS"),
+                            h("option", { value: "OTHER" }, "OTHER")
                         )
                     ),
                     h("div", { className: "mc-form-group" },
@@ -879,7 +902,7 @@ module.exports = (() => {
             };
 
             BdApi.UI.showConfirmationModal(
-                "➕ Add New Market Event",
+                "➕ Add New Event",
                 h(AddEventForm),
                 {
                     confirmText: "Save Event",
@@ -1094,6 +1117,8 @@ module.exports = (() => {
                                                             let color = "#bd93f9";
                                                             if (e.market === "INDO") color = "#ff5555";
                                                             if (e.market === "BOTH") color = "#ff79c6";
+                                                            if (e.market === "PROJECTS") color = "#50fa7b";
+                                                            if (e.market === "OTHER") color = "#ffb86c";
                                                             return h("div", { 
                                                                 className: "mc-fv-event-item", 
                                                                 style: { backgroundColor: color }, 
@@ -1110,9 +1135,11 @@ module.exports = (() => {
                             // Footer Kalender dengan Legenda
                             h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "16px", borderTop: "1px solid var(--border-muted, rgba(255,255,255,0.08))", paddingTop: "12px" } },
                                 h("div", { className: "mc-legend" },
-                                    h("span", { className: "mc-legend-item" }, h("span", { className: "mc-dot-legend US" }), " US Market"),
-                                    h("span", { className: "mc-legend-item" }, h("span", { className: "mc-dot-legend INDO" }), " INDO Market"),
-                                    h("span", { className: "mc-legend-item" }, h("span", { className: "mc-dot-legend BOTH" }), " BOTH Markets")
+                                    h("span", { className: "mc-legend-item" }, h("span", { className: "mc-dot-legend US" }), " US"),
+                                    h("span", { className: "mc-legend-item" }, h("span", { className: "mc-dot-legend INDO" }), " INDO"),
+                                    h("span", { className: "mc-legend-item" }, h("span", { className: "mc-dot-legend BOTH" }), " BOTH"),
+                                    h("span", { className: "mc-legend-item" }, h("span", { className: "mc-dot-legend PROJECTS" }), " PROJECTS"),
+                                    h("span", { className: "mc-legend-item" }, h("span", { className: "mc-dot-legend OTHER" }), " OTHER")
                                 ),
                                 h("span", { style: { fontSize: "11px", color: "var(--text-muted, #64748b)" } }, "* Tip: Click on any empty day to add a new event.")
                             )
@@ -1161,6 +1188,8 @@ module.exports = (() => {
                                             let color = "#bd93f9";
                                             if (e.market === "INDO") color = "#ff5555";
                                             if (e.market === "BOTH") color = "#ff79c6";
+                                            if (e.market === "PROJECTS") color = "#50fa7b";
+                                            if (e.market === "OTHER") color = "#ffb86c";
                                             return h("span", { 
                                                 className: "mc-dot", 
                                                 style: { backgroundColor: color }, 
@@ -1176,9 +1205,29 @@ module.exports = (() => {
                             h("div", { className: "mc-detail-header" },
                                 h("span", { 
                                     className: "mc-market-badge",
-                                    style: { backgroundColor: selectedEvent.market === "INDO" ? "#ef4444" : selectedEvent.market === "US" ? "#3b82f6" : "#a855f7" }
-                                }, `${selectedEvent.market} Market`),
-                                h("button", { className: "mc-close-detail", onClick: () => setSelectedEvent(null) }, "✖")
+                                    style: { backgroundColor: selectedEvent.market === "INDO" ? "#ff5555" : selectedEvent.market === "BOTH" ? "#ff79c6" : selectedEvent.market === "PROJECTS" ? "#50fa7b" : selectedEvent.market === "OTHER" ? "#ffb86c" : "#bd93f9" }
+                                }, `${selectedEvent.market}`),
+                                h("div", { style: { display: "flex", gap: "10px", alignItems: "center" } },
+                                    h("button", {
+                                        style: { background: "transparent", border: "none", color: "#ff5555", cursor: "pointer", fontSize: "12px", fontWeight: "bold" },
+                                        onClick: () => {
+                                            if (confirm("Are you sure you want to delete this event?")) {
+                                                fetch(`${self.apiUrl}/api/events/${selectedEvent.id}`, {
+                                                    method: "DELETE",
+                                                    headers: { "Authorization": `Bearer ${self.apiToken}` }
+                                                }).then(res => {
+                                                    if(!res.ok) throw new Error("Failed");
+                                                    BdApi.showToast("Event deleted!", { type: "success" });
+                                                    setSelectedEvent(null);
+                                                    fetchEvents();
+                                                }).catch(err => {
+                                                    BdApi.showToast("Failed to delete event", { type: "error" });
+                                                });
+                                            }
+                                        }
+                                    }, "🗑 Delete"),
+                                    h("button", { className: "mc-close-detail", onClick: () => setSelectedEvent(null) }, "✖")
+                                )
                             ),
                             h("h4", { className: "mc-detail-title" }, selectedEvent.title),
                             selectedEvent.description && h("p", { 
@@ -1191,7 +1240,9 @@ module.exports = (() => {
                             h("div", { className: "mc-legend" },
                                 h("span", { className: "mc-legend-item" }, h("span", { className: "mc-dot-legend US" }), " US"),
                                 h("span", { className: "mc-legend-item" }, h("span", { className: "mc-dot-legend INDO" }), " INDO"),
-                                h("span", { className: "mc-legend-item" }, h("span", { className: "mc-dot-legend BOTH" }), " BOTH")
+                                h("span", { className: "mc-legend-item" }, h("span", { className: "mc-dot-legend BOTH" }), " BOTH"),
+                                h("span", { className: "mc-legend-item" }, h("span", { className: "mc-dot-legend PROJECTS" }), " PROJECTS"),
+                                h("span", { className: "mc-legend-item" }, h("span", { className: "mc-dot-legend OTHER" }), " OTHER")
                             ),
                             h("button", { 
                                 className: "mc-manage-btn",
