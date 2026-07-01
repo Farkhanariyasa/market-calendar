@@ -66,6 +66,8 @@ export default function CalendarDashboard({ session }: { session: any }) {
     if (m === "US") return "#3b82f6"; // Blue
     if (m === "INDO") return "#ef4444"; // Red
     if (m === "BOTH") return "#a855f7"; // Purple
+    if (m === "PROJECTS") return "#10b981"; // Green
+    if (m === "OTHER") return "#f59e0b"; // Orange
     return "#3b82f6";
   };
 
@@ -184,7 +186,7 @@ export default function CalendarDashboard({ session }: { session: any }) {
               
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">Market</label>
-                <div className="flex gap-4">
+                <div className="flex gap-4 flex-wrap">
                   <label className="flex items-center gap-2 cursor-pointer text-sm">
                     <input type="radio" name="market" value="US" checked={market === "US"} onChange={() => setMarket("US")} className="text-blue-500" />
                     US (Blue)
@@ -196,6 +198,14 @@ export default function CalendarDashboard({ session }: { session: any }) {
                   <label className="flex items-center gap-2 cursor-pointer text-sm">
                     <input type="radio" name="market" value="BOTH" checked={market === "BOTH"} onChange={() => setMarket("BOTH")} className="text-purple-500" />
                     Both (Purple)
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer text-sm">
+                    <input type="radio" name="market" value="PROJECTS" checked={market === "PROJECTS"} onChange={() => setMarket("PROJECTS")} className="text-green-500" />
+                    Projects (Green)
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer text-sm">
+                    <input type="radio" name="market" value="OTHER" checked={market === "OTHER"} onChange={() => setMarket("OTHER")} className="text-orange-500" />
+                    Other (Orange)
                   </label>
                 </div>
               </div>
