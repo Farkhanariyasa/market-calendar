@@ -218,6 +218,16 @@ client.on('interactionCreate', async (interaction) => {
 
       await interaction.showModal(modal);
     }
+
+    if (interaction.customId.startsWith('cal_delete_')) {
+      const eventId = interaction.customId.replace('cal_delete_', '');
+      try {
+        await prisma.event.delete({ where: { id: eventId } });
+        await interaction.update({ content: '✅ Event deleted successfully. (Use the /calendar command or prev/next to refresh)', embeds: [], components: [] });
+      } catch (err) {
+        await interaction.reply({ content: '❌ Error: Event not found or could not be deleted.', ephemeral: true });
+      }
+    }
   }
 
   if (interaction.isStringSelectMenu()) {
@@ -240,7 +250,11 @@ client.on('interactionCreate', async (interaction) => {
         embed.setImage(evt.image);
       }
 
-      await interaction.reply({ embeds: [embed], ephemeral: true });
+      const deleteBtnRow = new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setCustomId(`cal_delete_${eventId}`).setLabel('🗑️ Delete Event').setStyle(ButtonStyle.Danger)
+      );
+
+      await interaction.reply({ embeds: [embed], components: [deleteBtnRow], ephemeral: true });
     }
   }
 
